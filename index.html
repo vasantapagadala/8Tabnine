@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #expense-list {
+            list-style: none;
+            padding: 0;
+        }
+        #expense-list li {
+            margin-bottom: 10px;
+        }
+        .edit-mode {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Expense Tracker</h1>
+    <form id="expense-form">
+        <input type="text" id="expense-item" placeholder="Enter expense item">
+        <input type="number" id="expense-amount" placeholder="Enter expense amount">
+        <button type="submit">Add Expense</button>
+    </form>
+    <ul id="expense-list">
+    </ul>
+    <script>
+        const expenseList = document.getElementById('expense-list');
+        const expenseForm = document.getElementById('expense-form');
+
+        function renderExpenseList(expenseItems) {
+            expenseList.innerHTML = '';
+            expenseItems.forEach(function(item, index) {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span>${item.item}: ${item.amount}</span>
+                    <button class="edit-btn" data-index="${index}">Edit</button>
+                    <button class="delete-btn" data-index="${index}">Delete</button>
+                `;
+                listItem.addEventListener('click', function(event) {
+                    if (event.target.classList.contains('edit-btn')) {
+                        editExpenseItem(index);
+                    } else if (event.target.classList.contains('delete-btn')) {
+                        deleteExpenseItem(index);
+                    }
+                });
+                expenseList.appendChild(listItem);
+            });
+        }
+
+        function addExpenseItem(event) {
+            event.preventDefault();
+            const item = document.getElementById('expense-item').value;
+            const amount = document.getElementById('expense-amount').value;
+            if (item && amount) {
+                const newExpenseItem = {
+                    item: item,
+                    amount: amount
+                };
+                expenseItems.push(newExpenseItem);
+                renderExpenseList(expenseItems);
+                document.getElementById('expense-item').value = '';
+                document.getElementById('expense-amount').value = '';
+            }
+        }
+
+        function editExpenseItem(index) {
+            const item = expenseItems[index].item;
+            const amount = expenseItems[index].amount;
+            document.getElementById('expense-item').value = item;
+            document.getElementById('expense-amount').value = amount;
+            document.getElementById('expense-form').innerHTML = `
+                <input type="hidden" id="edit-index" value="${index}">
+                <button type="submit">Save Changes</button>
+            `;
+            document.getElementById('expense-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const newItem = document.getElementById('expense-item').value;
+                const newAmount = document.getElementById('expense-amount').value;
+                if (newItem && newAmount) {
+                    expenseItems[index].item = newItem;
+                    expenseItems[index].amount = newAmount;
+                    renderExpenseList(expenseItems);
+                    document.getElementById('expense-form').innerHTML = `
+                        <input type="text" id="expense-item" placeholder="Enter expense item">
+                        <input type="number" id="expense-amount" placeholder="Enter expense amount">
+                        <button type="submit">Add Expense</button>
+                    `;
+                    document.getElementById('expense-form').removeEventListener('submit', arguments.callee);
+                }
+            });
+        }
+
+        function deleteExpenseItem(index) {
+            expenseItems.splice(index, 1);
+            renderExpenseList(expenseItems);
+        }
+
+        const expenseItems = [];
+        expenseForm.addEventListener('submit', addExpenseItem);
+        renderExpenseList(expenseItems);
+    </script>
+</body>
+</html>
